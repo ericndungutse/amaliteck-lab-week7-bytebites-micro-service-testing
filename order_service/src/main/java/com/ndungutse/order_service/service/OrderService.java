@@ -3,14 +3,20 @@ package com.ndungutse.order_service.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndungutse.order_service.configuration.RabbitMQConfig;
 import com.ndungutse.order_service.model.Order;
 import com.ndungutse.order_service.model.OrderStatus;
 import com.ndungutse.order_service.repository.OrderRepository;
 
 @Service
 public class OrderService {
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    private static final String QUEUE_NAME = RabbitMQConfig.QUEUE_NAME;
 
     private final OrderRepository orderRepository;
 
@@ -27,6 +33,9 @@ public class OrderService {
         if (order.getStatus() == null) {
             order.setStatus(OrderStatus.PENDING);
         }
+
+        // Send order to RabbitMQ queue
+        rabbitTemplate.convertAndSend(QUEUE_NAME, order);
         return orderRepository.save(order);
     }
 
