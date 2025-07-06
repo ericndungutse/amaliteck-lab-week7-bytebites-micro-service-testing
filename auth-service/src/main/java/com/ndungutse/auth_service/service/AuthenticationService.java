@@ -48,6 +48,7 @@ public class AuthenticationService {
                 .userId(userDetails.getUserId())
                 .email(userDetails.getUser().getEmail())
                 .role(userDetails.getRoleName())
+                .fullName(userDetails.getUser().getFullName())
                 .build();
     }
 

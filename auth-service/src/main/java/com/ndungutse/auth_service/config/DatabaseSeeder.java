@@ -52,7 +52,7 @@ public class DatabaseSeeder {
             // Create Restaurant owner user
             if (!userRepository.existsByEmail("owner@example.com")) {
                 User manager = User.builder()
-                        .email("manager@example.com")
+                        .email("owner@example.com")
                         .password(passwordEncoder.encode("test123"))
                         .role(restaurantOwnerRole)
                         .fullName("Restaurant Owner")

@@ -8,8 +8,11 @@ import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.ndungutse.auth_service.service.CustomUserDetails;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -46,9 +49,19 @@ public class JwtUtils {
     }
 
     // Generate Jwt token
-    public String generateJwtTokenFromUsername(UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        return Jwts.builder().subject(username).issuedAt(new Date())
+    public String generateJwtTokenFromUsername(CustomUserDetails userDetails) {
+        String userRole = userDetails.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse(null);
+        return Jwts.builder().subject(String.valueOf(userDetails
+                .getUserId())).issuedAt(new Date())
+                .claim("email", userDetails.getUsername())
+                .claim("fullName", userDetails.getUser().getFullName())
+                .claim("role",
+                        userRole)
+                .claim("userId", userDetails.getUserId())
                 .expiration(new Date((new Date()).getTime() + Long.parseLong(jwtExpirationMS)))
                 .signWith(key()).compact();
 

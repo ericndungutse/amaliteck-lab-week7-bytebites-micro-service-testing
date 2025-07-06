@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:user-service}
+    name: ${SPRING_APPLICATION_NAME:AUTH-SERVICE}
   config:
     import: optional:file:.env[.properties]
   security:
@@ -15,6 +15,13 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:2000/eureka
+  instance:
+    prefer-ip-address: true
 
   jpa:
     hibernate:
