@@ -1,36 +1,8 @@
-server:
-  port: 5000
-
 spring:
   application:
     name: GATEWAY
-  security:
-    jwt:
-      secret: ${JWT_SECRET}
-      expirationMs: ${JWT_EXPIRATION_MS:86400000}
+  config:
+    import: 'configserver:'
   cloud:
-    gateway:
-      routes:
-        - id: auth-service
-          uri: lb://AUTH-SERVICE
-          predicates:
-            - Path=/api/v1/auth/**
-        - id: restaurant-service
-          uri: lb://RESTAURANT-SERVICE
-          predicates:
-            - Path=/api/v1/restaurants/**
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/api/v1/orders/**
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:2000/eureka
-  instance:
-    prefer-ip-address: true
-logging:
-  charset:
-    console: UTF-8
-  level:
-    'org.springframework.cloud.gateway': DEBUG
+    config:
+      uri: http://localhost:8000
