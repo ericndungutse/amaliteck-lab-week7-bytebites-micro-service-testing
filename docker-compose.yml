@@ -1,0 +1,114 @@
+version: '3.8'
+services:
+  config-server:
+    build:
+      context: ./config-server
+    container_name: byte_bytes_config_server
+    ports:
+      - '8000:8000'
+    env_file:
+      - ./config-server/src/main/resources/.env
+  eureka-server:
+    build:
+      context: ./eureka_server
+    container_name: byte_bytes_eureka_server
+    ports:
+      - '2000:2000'
+    depends_on:
+      - config-server
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8000
+      SPRING_APPLICATION_NAME: eureka-server
+      SPRING_CONFIG_IMPORT: 'configserver:'
+
+  gateway:
+    build:
+      context: ./api-gateway
+    container_name: byte_bytes_gateway
+    ports:
+      - '5000:5000'
+    depends_on:
+      - config-server
+      - eureka-server
+    env_file:
+      - ./api-gateway/src/main/resources/.env
+
+  restaurant_db:
+    image: postgres:latest
+    container_name: byte_bytes_restaurant_service_db
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: eric
+      POSTGRES_DB: restaurant_service
+    depends_on:
+      - config-server
+      - eureka-server
+  order_db:
+    image: postgres:latest
+    container_name: byte_bytes_order_service_db
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: eric
+      POSTGRES_DB: order_service
+    depends_on:
+      - config-server
+      - eureka-server
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: byte_bytes_rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+  user_db:
+    image: postgres:latest
+    container_name: byte_bytes_user_service_db
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: eric
+      POSTGRES_DB: user_service
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: byte_bytes_auth_service
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./auth-service/src/main/resources/.env
+    depends_on:
+      - config-server
+      - eureka-server
+      - user_db
+  restaurant-service:
+    build:
+      context: ./restaurant_service
+    container_name: byte_bytes_restaurant_service
+    ports:
+      - '4000:4000'
+    env_file:
+      - ./restaurant_service/src/main/resources/.env
+    depends_on:
+      - restaurant_db
+      - config-server
+      - eureka-server
+  order-service:
+    build:
+      context: ./order_service
+    container_name: byte_bytes_order_service
+    ports:
+      - '6000:6000'
+    env_file:
+      - ./order_service/src/main/resources/.env
+    depends_on:
+      - order_db
+      - config-server
+      - eureka-server
