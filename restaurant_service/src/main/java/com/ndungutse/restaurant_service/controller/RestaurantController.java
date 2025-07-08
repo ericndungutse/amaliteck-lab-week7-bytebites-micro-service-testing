@@ -6,7 +6,9 @@ import com.ndungutse.restaurant_service.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +19,18 @@ import java.util.Optional;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+
+    private final RestTemplate restTemplate;
+
+    private static final String RESTAURANT_SERVICE_URL = "http://order-service:6000/api/v1/orders/resilience-checker";
+
+    // Resilience checker endpoint
+    @GetMapping("/resilience-checker")
+    public ResponseEntity<String> resilienceChecker() {
+        ResponseEntity<String> response = restTemplate.getForEntity(RESTAURANT_SERVICE_URL,
+                String.class);
+        return new ResponseEntity<>(response.getBody() + " From Order Service", HttpStatus.OK);
+    }
 
     // Create a new restaurant
     @PostMapping
@@ -34,6 +48,7 @@ public class RestaurantController {
 
     // Get current user's restaurants
     @GetMapping("/my-restaurants")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
     public ResponseEntity<List<RestaurantDto>> getMyRestaurants() {
         List<RestaurantDto> restaurants = restaurantService.getMyRestaurants();
         return new ResponseEntity<>(restaurants, HttpStatus.OK);

@@ -42,13 +42,16 @@ public class SecurityConfig {
 
                 // Configure authorization rules
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.GET, "/api/v1/restaurants/**").permitAll().anyRequest()
-                        .hasRole("RESTAURANT_OWNER"))
+                        .requestMatchers(
+                                HttpMethod.GET, "/api/v1/restaurants/**",
+                                "/api/v1/restaurants/resilience-checker")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .logout(AbstractHttpConfigurer::disable)
-                .addFilterBefore(headerAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint));
+                .addFilterBefore(headerAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -43,6 +43,11 @@ public class OrderController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/resilience-checker")
+    public ResponseEntity<String> resilienceChecker(Long id) {
+        return new ResponseEntity<>("Good", HttpStatus.OK);
+    }
+
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<Order>> getOrdersByCustomerId(@PathVariable Long customerId) {
         List<Order> orders = orderService.getOrdersByCustomerId(customerId);

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import com.ndungutse.restaurant_service.model.Restaurant;
 import com.ndungutse.restaurant_service.repository.RestaurantRepository;
 
-// @Configuration
+@Configuration
 public class Seed {
 
     @Bean

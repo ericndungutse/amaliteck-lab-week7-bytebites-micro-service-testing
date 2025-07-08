@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ndungutse.auth_service.model.Role;
@@ -12,7 +13,7 @@ import com.ndungutse.auth_service.model.User;
 import com.ndungutse.auth_service.repository.RoleRepository;
 import com.ndungutse.auth_service.repository.UserRepository;
 
-// @Configuration
+@Configuration
 public class DatabaseSeeder {
     @Bean
     CommandLineRunner initDatabase(

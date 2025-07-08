@@ -26,6 +26,9 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         System.out.println("Unauthorized request: " + authException.getMessage());
         Map<String, String> error = new HashMap<>();
         error.put("message", authException.getMessage());
+        error.put("status", String.valueOf(HttpStatus.UNAUTHORIZED.value()));
+        error.put("error", "Unauthorized");
+        error.put("path", request.getRequestURI());
         response.setContentType("application/json");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         objectMapper.writeValue(response.getWriter(), error);

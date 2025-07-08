@@ -39,6 +39,7 @@ public class SecurityConf {
 
                 // Configure authorization rules
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/resilience-checker").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
