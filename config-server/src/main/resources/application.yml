@@ -1,10 +1,7 @@
 server:
   port: ${SERVER_PORT}
-  address: 0.0.0.0
 
 spring:
-  config:
-    import: optional:dotenv:/.env
   cloud:
     config:
       server:

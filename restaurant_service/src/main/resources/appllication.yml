@@ -1,9 +1,0 @@
-spring:
-  config:
-    import: 'configserver:'
-  cloud:
-    config:
-      uri: http://localhost:8000
-      fail-fast: true
-      fail-on-empty-keys: true
-      import-checks-enabled: true

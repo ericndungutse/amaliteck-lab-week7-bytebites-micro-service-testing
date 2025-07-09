@@ -1,8 +1,10 @@
+server:
+  port: ${SERVER_PORT}
 spring:
   application:
-    name: eureka-server
+    name: ${SPRING_APPLICATION_NAME}
   config:
     import: 'configserver:'
   cloud:
     config:
-      uri: http://localhost:8000
+      uri: ${SPRING_CLOUD_CONFIG_URI}
