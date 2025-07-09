@@ -1,17 +1,26 @@
 package com.ndungutse.restaurant_service.controller;
 
-import com.ndungutse.restaurant_service.dto.RestaurantDto;
-import com.ndungutse.restaurant_service.dto.RestaurantRequestDto;
-import com.ndungutse.restaurant_service.service.RestaurantService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.Optional;
+import com.ndungutse.restaurant_service.dto.RestaurantDto;
+import com.ndungutse.restaurant_service.dto.RestaurantRequestDto;
+import com.ndungutse.restaurant_service.service.RestaurantService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/restaurants")
@@ -22,7 +31,7 @@ public class RestaurantController {
 
     private final RestTemplate restTemplate;
 
-    private static final String RESTAURANT_SERVICE_URL = "http://order-service:6000/api/v1/orders/resilience-checker";
+    private static final String RESTAURANT_SERVICE_URL = "http://localhost:9000/api/v1/orders/resilience-checker";
 
     // Resilience checker endpoint
     @GetMapping("/resilience-checker")

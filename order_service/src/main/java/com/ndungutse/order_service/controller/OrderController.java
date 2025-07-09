@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndungutse.order_service.model.Order;
 import com.ndungutse.order_service.service.OrderService;
+import com.ndungutse.order_service.dto.OrderRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,10 +26,10 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest orderRequest) {
 
         try {
-            Order createdOrder = orderService.createOrder(order);
+            Order createdOrder = orderService.createOrder(orderRequest);
             return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             System.out.println("*********************************** Error creating order: " + e.getMessage());

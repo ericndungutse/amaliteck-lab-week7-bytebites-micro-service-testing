@@ -54,7 +54,8 @@ public class SecurityConfig {
 
                                 .logout(AbstractHttpConfigurer::disable)
                                 .addFilterBefore(headerAuthenticationFilter,
-                                                UsernamePasswordAuthenticationFilter.class);
+                                                UsernamePasswordAuthenticationFilter.class)
+                                .exceptionHandling(handler -> handler.authenticationEntryPoint(customAuthEntryPoint));
 
                 return http.build();
         }

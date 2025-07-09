@@ -1,16 +1,22 @@
 package com.ndungutse.order_service.service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.ndungutse.order_service.configuration.RabbitMQConfig;
+import com.ndungutse.order_service.dto.OrderRequest;
 import com.ndungutse.order_service.model.Order;
 import com.ndungutse.order_service.model.OrderStatus;
 import com.ndungutse.order_service.repository.OrderRepository;
+import com.ndungutse.order_service.security.UserPrincipal;
 
 @Service
 public class OrderService {
@@ -25,14 +31,20 @@ public class OrderService {
     }
 
     // Create a new order
-    public Order createOrder(Order order) {
-        // Validate order before creation
-        validateOrder(order);
+    public Order createOrder(OrderRequest orderRequest) {
 
-        // Set default status if not provided
-        if (order.getStatus() == null) {
-            order.setStatus(OrderStatus.PENDING);
-        }
+        Order order = new Order();
+        order.setRestaurantId(orderRequest.getRestaurantId());
+        order.setDescription(orderRequest.getDescription());
+        order.setTotal_amount(orderRequest.getTotalAmount());
+        order.setStatus(OrderStatus.PENDING);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Set customer ID from authenticated user
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        Long customerId = Long.parseLong(principal.getUserId());
+        order.setCustomerId(customerId);
 
         // Send order to RabbitMQ queue
         rabbitTemplate.convertAndSend(QUEUE_NAME, order);
@@ -55,17 +67,15 @@ public class OrderService {
     }
 
     // Validate order before creation/update
-    private void validateOrder(Order order) {
-        if (order.getCustomerId() == null) {
-            throw new IllegalArgumentException("Customer ID is required");
-        }
+    private void validateOrder(OrderRequest order) {
+
         if (order.getRestaurantId() == null) {
             throw new IllegalArgumentException("Restaurant ID is required");
         }
         if (order.getDescription() == null || order.getDescription().trim().isEmpty()) {
             throw new IllegalArgumentException("Order description is required");
         }
-        if (order.getTotal_amount() != null && order.getTotal_amount() < 0) {
+        if (order.getTotalAmount() != null && order.getTotalAmount() < 0) {
             throw new IllegalArgumentException("Total amount cannot be negative");
         }
     }
