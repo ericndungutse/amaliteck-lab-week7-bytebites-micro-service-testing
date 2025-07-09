@@ -9,12 +9,135 @@ ByteBites is a microservices-based system designed to manage restaurant operatio
 The system consists of the following services:
 
 - **Eureka Server**: Service registry for microservice discovery.
-- **API Gateway**: Central entry point for all client requests, routing to appropriate services.
-- **Auth Service**: Handles user authentication and authorization.
+- **API Gateway**: Central entry point for all client requests, routing to appropriate services and validating JWT tokens.
+- **Auth Service**: Handles user authentication and issues JWT tokens.
 - **Restaurant Service**: Manages restaurant data and operations.
 - **Order Service**: Handles order creation, management, and processing.
+- **Notification Service**: Listens for order events from RabbitMQ and sends notifications. **It does not use Eureka, Config Server, or authentication.**
+- **Config Server**: Centralized configuration for all services (except Notification Service).
 
 Each service is a standalone Spring Boot application with its own configuration and dependencies.
+
+---
+
+## System Architecture Diagram
+
+```mermaid
+flowchart TD
+  Client["Client (Frontend)"]
+  Gateway["API Gateway"]
+  Eureka["Eureka Server"]
+  Auth["Auth Service"]
+  Restaurant["Restaurant Service"]
+  Order["Order Service"]
+  Notification["Notification Service"]
+  Config["Config Server"]
+  RabbitMQ["RabbitMQ"]
+  DB1["PostgreSQL (Auth DB)"]
+  DB2["PostgreSQL (Restaurant DB)"]
+  DB3["PostgreSQL (Order DB)"]
+  DB4["PostgreSQL (Notification DB)"]
+
+  Client --> Gateway
+  Gateway --> Auth
+  Gateway --> Restaurant
+  Gateway --> Order
+  Auth --> DB1
+  Restaurant --> DB2
+  Order --> DB3
+  Notification --> DB4
+  Auth <--> Eureka
+  Restaurant <--> Eureka
+  Order <--> Eureka
+  Gateway <--> Eureka
+  Eureka <--> Config
+  Auth <--> Config
+  Restaurant <--> Config
+  Order <--> Config
+  Gateway <--> Config
+  Order -- "Order Events" --> RabbitMQ
+  Notification -- "Order Events" --> RabbitMQ
+  RabbitMQ -- "Order Events" --> Notification
+```
+
+**Note:** Notification Service is not connected to Eureka or Config Server and does not implement authentication.
+
+---
+
+## Sequence Flow: Placing an Order and Notification
+
+```mermaid
+sequenceDiagram
+  participant Client as Client (Frontend)
+  participant Gateway as API Gateway
+  participant Auth as Auth Service
+  participant Restaurant as Restaurant Service
+  participant Order as Order Service
+  participant Notification as Notification Service
+  participant RabbitMQ as RabbitMQ
+
+  Client->>Gateway: HTTP Request (e.g., Place Order)
+  Gateway->>Gateway: Validate JWT (locally)
+  alt JWT valid
+    Gateway->>Order: Forward Order Request
+    Order->>RabbitMQ: Publish Order Event
+    RabbitMQ->>Notification: Consume Order Event
+    Notification-->>Client: Send Notification (e.g., Email/SMS)
+  else JWT invalid
+    Gateway-->>Client: Reject (401 Unauthorized)
+  end
+```
+
+---
+
+## Security Architecture
+
+```mermaid
+flowchart TD
+  subgraph Security
+    Auth["Auth Service"]
+    Gateway["API Gateway"]
+    Restaurant["Restaurant Service"]
+    Order["Order Service"]
+  end
+  Auth -- issues JWT --> Client["Client"]
+  Client -- sends JWT --> Gateway
+  Gateway -- validates JWT (locally) --> Gateway
+  Gateway -- forwards JWT --> Restaurant
+  Gateway -- forwards JWT --> Order
+  Restaurant -- checks JWT --> Gateway
+  Order -- checks JWT --> Gateway
+```
+
+**Note:** Notification Service is not part of the security architecture.
+
+---
+
+## Messaging Flow: Order Events and Notifications
+
+```mermaid
+flowchart TD
+  Order["Order Service"]
+  RabbitMQ["RabbitMQ"]
+  Notification["Notification Service"]
+  Order -- "Order Placed Event" --> RabbitMQ
+  RabbitMQ -- "Order Event" --> Notification
+  Notification -- "Send Notification (Email/SMS)" --> User["User"]
+```
+
+---
+
+## Notification Service
+
+- **Path**: `notification_service`
+- **Purpose**: Listens for order events from RabbitMQ and sends notifications (e.g., email/SMS) to users.
+- **Tech Stack**: Spring Boot, RabbitMQ, JPA, PostgreSQL
+- **Main Class**: `NotificationServiceApplication.java`
+- **Config**: `src/main/resources/application.properties`
+  - Uses environment variables for DB and RabbitMQ config
+  - **Does not register with Eureka or use Config Server**
+- **Messaging**: Consumes order events from RabbitMQ and triggers notifications
+- **Security**: No authentication or authorization implemented
 
 ---
 
