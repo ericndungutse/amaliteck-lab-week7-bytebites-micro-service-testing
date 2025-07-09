@@ -105,7 +105,7 @@ services:
       context: ./order_service
     container_name: byte_bytes_order_service
     ports:
-      - '6000:6000'
+      - '9000:9000'
     env_file:
       - ./order_service/src/main/resources/.env
     depends_on:

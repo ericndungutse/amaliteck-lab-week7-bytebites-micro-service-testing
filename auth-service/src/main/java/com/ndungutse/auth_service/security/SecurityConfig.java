@@ -26,10 +26,7 @@ import com.ndungutse.auth_service.service.CustomUserDetailsService;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final JwtUtils jwtUtils;
-    private final UserRepository userRepository;
-    private final ObjectMapper objectMapper;
+    private final JwtAuthenticationFilter jwtAuthFilter;;
     private final AuthenticationEntryPoint customAuthenticationEntryPoint;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
@@ -40,9 +37,6 @@ public class SecurityConfig {
             AuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
-        this.jwtUtils = jwtUtils;
-        this.userRepository = userRepository;
-        this.objectMapper = objectMapper;
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
@@ -55,7 +49,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**")
+                        .requestMatchers("/actuator/**", "/api/v1/auth/**", "/error/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())

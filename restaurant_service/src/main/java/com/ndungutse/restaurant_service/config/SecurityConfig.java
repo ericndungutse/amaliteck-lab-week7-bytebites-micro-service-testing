@@ -19,41 +19,44 @@ import com.ndungutse.restaurant_service.security.HeaderAuthenticationFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final CustomAuthEntryPoint customAuthEntryPoint;
-    private final HeaderAuthenticationFilter headerAuthenticationFilter;
+        private final CustomAuthEntryPoint customAuthEntryPoint;
+        private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
-    public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint,
-            HeaderAuthenticationFilter headerAuthenticationFilter) {
-        this.customAuthEntryPoint = customAuthEntryPoint;
-        this.headerAuthenticationFilter = headerAuthenticationFilter;
-    }
+        public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint,
+                        HeaderAuthenticationFilter headerAuthenticationFilter) {
+                this.customAuthEntryPoint = customAuthEntryPoint;
+                this.headerAuthenticationFilter = headerAuthenticationFilter;
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // Disable CSRF protection as this is a microservice (stateless API)
-                .csrf(AbstractHttpConfigurer::disable)
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                // Disable CSRF protection as this is a microservice (stateless API)
+                                .csrf(AbstractHttpConfigurer::disable)
 
-                // Disable form login
-                .formLogin(AbstractHttpConfigurer::disable)
+                                // Disable form login
+                                .formLogin(AbstractHttpConfigurer::disable)
 
-                // Set session creation policy to stateless (no sessions)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                // Set session creation policy to stateless (no sessions)
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Configure authorization rules
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(
-                                HttpMethod.GET, "/api/v1/restaurants/**",
-                                "/api/v1/restaurants/resilience-checker")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
-                .httpBasic(AbstractHttpConfigurer::disable)
+                                // Configure authorization rules
+                                .authorizeHttpRequests(authz -> authz
+                                                .requestMatchers(
+                                                                HttpMethod.GET, "/api/v1/restaurants/**",
+                                                                "/api/v1/restaurants/resilience-checker",
+                                                                "/actuator/**")
+                                                .permitAll()
+                                                .anyRequest()
+                                                .authenticated())
+                                .httpBasic(AbstractHttpConfigurer::disable)
 
-                .logout(AbstractHttpConfigurer::disable)
-                .addFilterBefore(headerAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .logout(AbstractHttpConfigurer::disable)
+                                .addFilterBefore(headerAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
 }
