@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+@Setter
+@Getter
 class ValidationErrorResponse {
     private Integer status;
     private String message;
@@ -25,55 +30,26 @@ class ValidationErrorResponse {
 
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setErrors(Map<String, String> errors) {
-        this.errors = errors;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public Map<String, String> getErrors() {
-        return errors;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRestaurantNotFoundException(RestaurantNotFoundException ex) {
+        logger.error("Restaurant not found: {}", ex.getMessage());
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("path", "/api/v1/restaurants");
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
 
-        logger.warn("Access denied: {}", ex.getMessage());
+        logger.error("Access denied: {}", ex.getMessage());
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.FORBIDDEN.value());
@@ -96,6 +72,17 @@ public class GlobalExceptionHandler {
         errorResponse.put("path", "/api/v1/restaurants");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        logger.error("Method argument type mismatch: {}", ex.getMessage());
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+        errorResponse.put("message", "Invalid argument type");
+        errorResponse.put("path", "/api/v1/restaurants");
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

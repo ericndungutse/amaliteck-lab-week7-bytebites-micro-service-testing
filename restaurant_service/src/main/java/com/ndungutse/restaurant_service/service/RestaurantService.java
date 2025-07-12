@@ -2,6 +2,7 @@ package com.ndungutse.restaurant_service.service;
 
 import com.ndungutse.restaurant_service.dto.RestaurantDto;
 import com.ndungutse.restaurant_service.dto.RestaurantRequestDto;
+import com.ndungutse.restaurant_service.exception.RestaurantNotFoundException;
 import com.ndungutse.restaurant_service.mapper.RestaurantMapper;
 import com.ndungutse.restaurant_service.model.Restaurant;
 import com.ndungutse.restaurant_service.repository.RestaurantRepository;
@@ -54,7 +55,7 @@ public class RestaurantService {
                     Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
                     return restaurantMapper.toDto(updatedRestaurant);
                 })
-                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with id: " + id));
     }
 
     public void deleteRestaurant(Long id) {
@@ -83,7 +84,7 @@ public class RestaurantService {
         return restaurantMapper.toDtoList(restaurants);
     }
 
-    // Helper method to get current authenticated user
+    // Helper method to get a current authenticated user
     private UserPrincipal getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
