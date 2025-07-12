@@ -3,6 +3,21 @@ spring:
     name: ${SPRING_APPLICATION_NAME}
   config:
     import: 'configserver:'
+  output:
+    ansi:
+      enabled: always
   cloud:
     config:
       uri: ${SPRING_CLOUD_CONFIG_URI}
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.ndungutse.restaurant_service: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%-5level){highlight} %clr(%logger{36}){cyan} %clr(-){faint} %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/restaurant-service.log

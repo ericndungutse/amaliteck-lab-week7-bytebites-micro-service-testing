@@ -31,6 +31,7 @@ class ValidationErrorResponse {
     }
 
 }
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -46,14 +47,16 @@ public class GlobalExceptionHandler {
         errorResponse.put("path", "/api/v1/restaurants");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
 
-        logger.error("Access denied: {}", ex.getMessage());
+        logger.warn("Access denied: {}", ex.getMessage());
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.FORBIDDEN.value());
-        errorResponse.put("error", "You are not allowed to perform this action. Please contact the administrator for further assistance.");
+        errorResponse.put("error",
+                "You are not allowed to perform this action. Please contact the administrator for further assistance.");
         errorResponse.put("message", ex.getMessage());
         errorResponse.put("path", "/api/v1/restaurants");
 
@@ -75,8 +78,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        logger.error("Method argument type mismatch: {}", ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex) {
+        logger.warn("Method argument type mismatch: {}", ex.getMessage());
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
@@ -90,7 +94,7 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        logger.error("Validation error occurred: {}", ex);
+        logger.warn("Validation error occurred: {}", ex);
 
         Map<String, String> errors = new HashMap<>();
 
