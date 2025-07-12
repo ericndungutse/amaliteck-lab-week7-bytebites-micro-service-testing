@@ -3,6 +3,7 @@ package com.ndungutse.restaurant_service.controller;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +44,8 @@ public class RestaurantController {
 
     // Create a new restaurant
     @PostMapping
-    public ResponseEntity<RestaurantDto> createRestaurant(@RequestBody RestaurantRequestDto requestDto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RestaurantDto> createRestaurant(@Valid @RequestBody RestaurantRequestDto requestDto) {
         RestaurantDto createdRestaurant = restaurantService.createRestaurant(requestDto);
         return new ResponseEntity<>(createdRestaurant, HttpStatus.CREATED);
     }
