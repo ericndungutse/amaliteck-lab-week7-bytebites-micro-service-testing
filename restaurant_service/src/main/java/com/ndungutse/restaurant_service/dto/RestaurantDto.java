@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantDto {
-
     private Long id;
     private String name;
     private Long owner;

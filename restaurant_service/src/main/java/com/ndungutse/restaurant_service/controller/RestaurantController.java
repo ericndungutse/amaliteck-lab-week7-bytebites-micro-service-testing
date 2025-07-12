@@ -3,6 +3,7 @@ package com.ndungutse.restaurant_service.controller;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +44,8 @@ public class RestaurantController {
 
     // Create a new restaurant
     @PostMapping
-    public ResponseEntity<RestaurantDto> createRestaurant(@RequestBody RestaurantRequestDto requestDto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RestaurantDto> createRestaurant(@Valid @RequestBody RestaurantRequestDto requestDto) {
         RestaurantDto createdRestaurant = restaurantService.createRestaurant(requestDto);
         return new ResponseEntity<>(createdRestaurant, HttpStatus.CREATED);
     }
@@ -63,7 +65,8 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    // Get restaurant by ID
+
+    // Get a restaurant by ID
     @GetMapping("/{id}")
     public ResponseEntity<RestaurantDto> getRestaurantById(@PathVariable Long id) {
         Optional<RestaurantDto> restaurant = restaurantService.getRestaurantById(id);
@@ -71,16 +74,14 @@ public class RestaurantController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update restaurant
+    // Update a restaurant
     @PutMapping("/{id}")
     public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable Long id,
-            @RequestBody RestaurantRequestDto requestDto) {
-        try {
+          @Valid  @RequestBody RestaurantRequestDto requestDto) {
+
             RestaurantDto updatedRestaurant = restaurantService.updateRestaurant(id, requestDto);
             return new ResponseEntity<>(updatedRestaurant, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
     }
 
     // Delete restaurant
@@ -94,14 +95,14 @@ public class RestaurantController {
         }
     }
 
-    // Check if restaurant exists
+    // Check if a restaurant exists
     @GetMapping("/{id}/exists")
     public ResponseEntity<Boolean> existsById(@PathVariable Long id) {
         boolean exists = restaurantService.existsById(id);
         return new ResponseEntity<>(exists, HttpStatus.OK);
     }
 
-    // Get total count of restaurants
+    // Get a total count of restaurants
     @GetMapping("/count")
     public ResponseEntity<Long> getTotalCount() {
         long count = restaurantService.getAllRestaurants().size();
